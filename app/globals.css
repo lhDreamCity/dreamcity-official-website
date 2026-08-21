@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ============ 梦之城 品牌设计系统（深蓝 + 金） ============ */
+@theme {
+  --color-brand: #0a2540;        /* 深邃品牌蓝 */
+  --color-brand-dark: #071a30;   /* 更深品牌蓝 */
+  --color-brand-soft: #1b3a6b;   /* 柔和品牌蓝 */
+  --color-gold: #d4af37;         /* 品牌金 */
+  --color-gold-bright: #f0c94c;  /* 亮金 */
+  --color-gold-soft: #f7e7b5;    /* 浅金 */
+  --color-ink: #0b1f3a;          /* 主文字 */
+  --color-ink-soft: #2c4a77;     /* 次文字 */
+  --color-paper: #ffffff;        /* 卡片底 */
+  --color-bg: #f6f8fc;           /* 页面底 */
+  --color-muted: #5b6b85;        /* 弱化文字 */
+  --color-line: rgba(10, 37, 64, 0.08);
+
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 通用工具类 ---------- */
+.container-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.grad-text {
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-bright));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 顶部导航 */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.18);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  animation: logo-glow 3.5s ease-in-out infinite;
+}
+
+@keyframes logo-glow {
+  0%, 100% { box-shadow: 0 4px 12px rgba(10, 37, 64, 0.18); }
+  50% { box-shadow: 0 4px 20px rgba(212, 175, 55, 0.45); }
+}
+
+/* 卡片 */
+.card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(10, 37, 64, 0.1);
+}
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-gold {
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-bright));
+  color: var(--color-brand-dark);
+  border: none;
+}
+.btn-gold:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid rgba(10, 37, 64, 0.2);
+}
+.btn-ghost:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+.btn-primary {
+  background: var(--color-brand);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  background: var(--color-brand-soft);
+}
+
+/* 章节 */
+.section {
+  padding: 80px 0;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 12px;
+}
+.section-desc {
+  color: var(--color-muted);
+  max-width: 620px;
+}
+
+/* 网格 */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* 卡片图标 */
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--color-gold-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
