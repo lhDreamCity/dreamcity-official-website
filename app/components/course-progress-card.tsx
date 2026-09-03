@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getCompletedCount } from "@/app/lib/progress";
+import { getCompletedCount, isLessonCompleted } from "@/app/lib/progress";
 import type { Course } from "@/app/lib/types";
 
 export default function CourseProgressCard({ course }: { course: Course }) {
@@ -20,7 +20,7 @@ export default function CourseProgressCard({ course }: { course: Course }) {
 
     // 找到第一个未完成的课时
     for (const lesson of course.lessons) {
-      if (!getCompletedCount(course.slug, lesson.id)) {
+      if (!isLessonCompleted(course.slug, lesson.id)) {
         setContinueLessonId(lesson.id);
         break;
       }

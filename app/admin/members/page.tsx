@@ -20,7 +20,7 @@ export default function AdminMembersPage() {
         </div>
         <div className="text-right">
           <p className="text-lg font-bold text-gold">¥{adminStats.revenue.toLocaleString()}</p>
-          <p className="text-[11px] text-ink-soft">累计营收（演示）</p>
+          <p className="text-[11px] text-ink-soft">累计营收</p>
         </div>
       </header>
 

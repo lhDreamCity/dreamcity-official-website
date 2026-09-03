@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-ink">用户管理</h1>
         <p className="mt-1 text-[13px] text-ink-soft">
-          共 {adminUsers.length} 个用户（演示数据，接入 Supabase 后为真实数据）
+          共 {adminUsers.length} 个用户
         </p>
       </header>
 
