@@ -8,11 +8,19 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      # API 密钥通过 .env 文件注入，不要硬编码
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_API_URL=${OPENAI_API_URL}
-      - OPENAI_MODEL=${OPENAI_MODEL}
+      # COS / CDN：可选。未设则视频继续走镜像内的 public/courses/。
+      # 生产部署时由 .env.local 注入，CI 构建时由 build-arg 嵌入客户端 bundle。
+      - NEXT_PUBLIC_COS_BASE_URL=${NEXT_PUBLIC_COS_BASE_URL:-}
+      # 安全敏感变量：host 没设时 docker compose 直接报错，避免容器起来后才发现。
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET must be set}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:?ADMIN_USERNAME must be set}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set}
+      # 聊天 / OpenAI 兼容 API：可选，没配 chatbot 直接降级。
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_API_URL=${OPENAI_API_URL:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-}
     env_file:
+      # 兜底注入：上面 environment 优先；这里兼容直接把 .env.local 拷贝到服务器部署的场景。
       - .env.local
     restart: unless-stopped
     healthcheck:
