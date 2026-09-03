@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env*.example
 
 # vercel
 .vercel
@@ -45,8 +46,8 @@ next-env.d.ts
 *.log
 dev.log
 
-# course videos are large; tracked separately via deployment
-# public/courses/**/*.mp4
+# course videos are large; served from Tencent Cloud COS (NOT tracked in git)
+public/courses/**/*.mp4
 
 # scratch / experimental
 /temp_covers/
