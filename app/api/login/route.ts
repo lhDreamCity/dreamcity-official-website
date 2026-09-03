@@ -1,32 +1,57 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { MEMBER_COOKIE, ROLE_COOKIE, USER_COOKIE } from "@/app/lib/auth";
-import type { RoleName } from "@/app/lib/types";
-import { ALL_ROLES } from "@/app/lib/rbac";
+import {
+  MEMBER_COOKIE,
+  ROLE_COOKIE,
+  SESSION_COOKIE_OPTS,
+  USER_COOKIE,
+} from "@/app/lib/auth";
+import { signValue } from "@/app/lib/session-secret";
+import {
+  VERIFY_ERROR_MESSAGES,
+  checkCode,
+} from "@/app/lib/verify";
+import { getClientIp, rateLimit } from "@/app/lib/rate-limit";
 
-/* 登录（Supabase 占位）：当前宽松验证，仅作 demo。
-   接入 Supabase Auth 后替换为 supabase.auth.signInWithPassword()。
+/* 学员登录：手机号 + 短信验证码。
+   验证码由 /api/verify-code 签发（开发期 mock，生产期接短信服务商）。
+   Cookie 值均经过 HMAC 签名，详见 app/lib/session-secret.ts。 */
 
-   开发期可选 role 字段用于模拟 RBAC 角色：
-     POST { email, role?: "admin" | "teacher" | "editor" | "member" }
-   admin/teacher/editor 角色默认视为会员（拥有 lesson:watch）。 */
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const { email, role } = body;
-  if (!email || !email.includes("@")) {
-    return NextResponse.json({ error: "请输入有效邮箱" }, { status: 400 });
+  const ip = getClientIp(req);
+  const limit = rateLimit(`login:${ip}`, 5, 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "请求过于频繁，请稍后再试" },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
+        },
+      },
+    );
   }
 
-  const parsedRole = (role as RoleName | undefined) ?? "member";
-  const isSimulated = ALL_ROLES.includes(parsedRole);
-  const isAdmin = parsedRole === "admin";
+  const body = await req.json().catch(() => ({}));
+  const { phone, code } = body;
+
+  if (!phone || !/^1\d{10}$/.test(String(phone))) {
+    return NextResponse.json({ error: "请输入正确的手机号" }, { status: 400 });
+  }
+
+  const result = checkCode(String(phone), code);
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: VERIFY_ERROR_MESSAGES[result.reason] },
+      { status: 401 },
+    );
+  }
 
   const store = await cookies();
-  store.set(USER_COOKIE, email, { path: "/", httpOnly: false });
-  store.set(MEMBER_COOKIE, isAdmin ? "1" : "1", { path: "/", httpOnly: false });
-  if (isSimulated) {
-    store.set(ROLE_COOKIE, parsedRole, { path: "/", httpOnly: false });
-  }
+  const opts = SESSION_COOKIE_OPTS;
+  store.set(USER_COOKIE, await signValue(String(phone)), opts);
+  store.set(MEMBER_COOKIE, await signValue("1"), opts);
+  store.set(ROLE_COOKIE, await signValue("member"), opts);
 
-  return NextResponse.json({ ok: true, user: { email, role: parsedRole } });
+  return NextResponse.json({ ok: true, user: { phone, role: "member" } });
 }

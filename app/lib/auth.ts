@@ -1,54 +1,76 @@
 import { cookies } from "next/headers";
 import type { RoleName, User } from "./types";
 import { resolvePermissions } from "./rbac";
+import { signValue, verifyValue } from "./session-secret";
 
 /* ============================================================
-   认证与会话（Supabase 占位）
-   当前使用 cookie 标记模拟用户，未接真实 Supabase Auth。
-   上线时替换为 Supabase 的 getUser() 即可，调用签名保持一致。
-
-   开发期角色模拟：通过 dcw_role cookie 指定角色，
-   例如 dcw_role=admin 模拟超级管理员。
+   认证与会话
+   会话通过 httpOnly Cookie 维护，登录后写入用户标识与角色。
+   Cookie 值经过 HMAC-SHA256 签名（见 session-secret.ts），
+   客户端无法篡改角色来绕过权限检查。
    ============================================================ */
 
 export const USER_COOKIE = "dcw_user";
 export const MEMBER_COOKIE = "dcw_member";
 export const ROLE_COOKIE = "dcw_role";
 
-/** 允许通过 cookie 模拟的角色（仅开发期） */
-const SIMULATED_ROLES: RoleName[] = ["admin", "teacher", "editor", "member"];
+const ALLOWED_ROLES: RoleName[] = ["admin", "teacher", "editor", "member"];
+
+const COOKIE_BASE_OPTS = {
+  path: "/",
+  httpOnly: true,
+  sameSite: "lax" as const,
+};
+
+/** Read and verify one of our signed cookies. Returns the payload or null. */
+export async function readSignedCookie(name: string): Promise<string | null> {
+  const store = await cookies();
+  const raw = store.get(name)?.value;
+  return verifyValue(raw);
+}
 
 /**
- * 读取当前用户（占位）。Supabase 接入后替换为：
- *   const supabase = createClient();
- *   const { data } = await supabase.auth.getUser();
+ * Build a signed cookie value (HMAC over payload). Use this in route handlers
+ * before passing to cookies().set().
+ */
+export async function signedCookieValue(payload: string): Promise<string> {
+  return signValue(payload);
+}
+
+/**
+ * Read the current user. Returns null if not logged in or if the session
+ * cookie is tampered / unsigned / from a stale secret.
  */
 export async function getCurrentUser(): Promise<User | null> {
-  const store = await cookies();
-  const raw = store.get(USER_COOKIE)?.value;
-  if (!raw) return null;
+  const user = await readSignedCookie(USER_COOKIE);
+  if (!user) return null;
 
-  const isMember = store.get(MEMBER_COOKIE)?.value === "1";
+  const memberRaw = await readSignedCookie(MEMBER_COOKIE);
+  const isMember = memberRaw === "1";
 
-  // 角色：dcw_role cookie 模拟，缺省时按会员/非会员推导
-  const roleCookie = store.get(ROLE_COOKIE)?.value as RoleName | undefined;
+  const roleRaw = await readSignedCookie(ROLE_COOKIE);
   let roles: RoleName[];
-  if (roleCookie && SIMULATED_ROLES.includes(roleCookie)) {
-    roles = [roleCookie];
+  if (roleRaw && (ALLOWED_ROLES as string[]).includes(roleRaw)) {
+    roles = [roleRaw as RoleName];
   } else {
     roles = isMember ? ["member"] : ["guest"];
   }
 
-  // 展平权限
   const permissions = resolvePermissions(roles);
 
   return {
     id: 1,
-    email: raw,
+    email: user,
     nickname: roles.includes("admin") ? "管理员" : "学员",
     isMember: isMember || roles.includes("member"),
-    membershipStatus: isMember ? "active" : roles.includes("member") ? "active" : "none",
+    membershipStatus: isMember || roles.includes("member") ? "active" : "none",
     roles,
     permissions,
   };
 }
+
+/** Standard cookie options used when writing session cookies in API routes. */
+export const SESSION_COOKIE_OPTS = {
+  ...COOKIE_BASE_OPTS,
+  secure: process.env.NODE_ENV === "production",
+};

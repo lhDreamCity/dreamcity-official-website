@@ -2,11 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/auth";
 import { hasRole } from "@/app/lib/rbac";
-import { courses, MEMBERSHIP_PRICE } from "@/app/lib/data";
+import { courses } from "@/app/lib/data";
 import CourseProgressCard from "@/app/components/course-progress-card";
 import StreakWidget from "@/app/components/streak-widget";
 
-export const metadata = { title: "会员中心 - 梦之城AI赋能中心" };
+export const metadata = { title: "个人中心 - 梦之城AI赋能中心" };
 
 export default async function AccountPage() {
   const user = await getCurrentUser();
@@ -20,7 +20,7 @@ export default async function AccountPage() {
       <section className="bg-gradient-to-br from-brand-dark via-brand to-brand-soft py-16 text-white">
         <div className="container-page">
           <span className="section-tag !text-gold-bright">Account</span>
-          <h1 className="text-3xl font-bold">会员中心</h1>
+          <h1 className="text-3xl font-bold">个人中心</h1>
           <p className="mt-2 text-[15px] text-white/70">你好，{user.nickname || user.email}</p>
         </div>
       </section>
@@ -28,7 +28,7 @@ export default async function AccountPage() {
       <section className="section">
         <div className="container-page">
           <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-            {/* 会员状态卡片 */}
+            {/* 账号信息卡片 */}
             <aside className="card h-fit p-8">
               <h3 className="mb-5 text-[15px] font-bold text-ink">我的账号</h3>
               <dl className="space-y-3 text-[14px]">
@@ -37,22 +37,8 @@ export default async function AccountPage() {
                   <dd className="font-medium text-ink">{user.nickname}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted">邮箱</dt>
+                  <dt className="text-muted">手机号</dt>
                   <dd className="max-w-[160px] truncate font-medium text-ink">{user.email}</dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-muted">会员状态</dt>
-                  <dd>
-                    {user.isMember ? (
-                      <span className="rounded-full bg-gold-soft px-3 py-1 text-[12px] font-bold text-gold">
-                        永久会员
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-bg px-3 py-1 text-[12px] text-muted">
-                        未开通
-                      </span>
-                    )}
-                  </dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-muted">角色</dt>
@@ -61,13 +47,9 @@ export default async function AccountPage() {
                       <span className="rounded-full bg-brand-soft px-3 py-1 text-[12px] font-semibold text-white">
                         超级管理员
                       </span>
-                    ) : user.roles.includes("member") ? (
+                    ) : (
                       <span className="rounded-full bg-gold-soft px-3 py-1 text-[12px] font-semibold text-gold">
                         学员
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-bg px-3 py-1 text-[12px] text-muted">
-                        访客
                       </span>
                     )}
                   </dd>
@@ -82,17 +64,6 @@ export default async function AccountPage() {
                   </Link>
                 </div>
               )}
-
-              {!user.isMember && (
-                <div className="mt-6 rounded-xl border border-gold/40 bg-gold-soft/30 p-4 text-center">
-                  <p className="mb-3 text-[13px] text-ink-soft">
-                    开通永久会员，畅学全部课程（¥{MEMBERSHIP_PRICE.toLocaleString()}）
-                  </p>
-                  <Link href="/membership" className="btn btn-gold w-full !py-2 text-[13px]">
-                    立即开通
-                  </Link>
-                </div>
-              )}
             </aside>
 
             {/* 我的课程 */}
@@ -100,23 +71,11 @@ export default async function AccountPage() {
               <StreakWidget />
 
               <h3 className="text-lg font-bold text-ink">我的课程</h3>
-
-              {!user.isMember ? (
-                <div className="card p-12 text-center">
-                  <span className="mb-4 inline-block text-5xl">🔒</span>
-                  <h4 className="mb-2 text-lg font-bold text-ink">开通会员后即可开始学习</h4>
-                  <p className="mb-6 text-[14px] text-muted">全站课程对会员开放，一次开通永久有效。</p>
-                  <Link href="/membership" className="btn btn-gold">
-                    开通会员
-                  </Link>
-                </div>
-              ) : (
-                <div className="grid gap-6">
-                  {courses.map((course) => (
-                    <CourseProgressCard key={course.slug} course={course} />
-                  ))}
-                </div>
-              )}
+              <div className="grid gap-6">
+                {courses.map((course) => (
+                  <CourseProgressCard key={course.slug} course={course} />
+                ))}
+              </div>
             </div>
           </div>
         </div>

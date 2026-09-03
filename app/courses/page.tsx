@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { courses, MEMBERSHIP_PRICE } from "@/app/lib/data";
+import { courses } from "@/app/lib/data";
+import { getCurrentUser } from "@/app/lib/auth";
+import CourseAtlas from "@/app/components/course-atlas";
 
 export const metadata = { title: "课程中心 - 梦之城AI赋能中心" };
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const user = await getCurrentUser();
   return (
     <>
       <section className="bg-gradient-to-br from-brand-dark via-brand to-brand-soft py-20 text-white">
@@ -12,10 +15,12 @@ export default function CoursesPage() {
           <span className="section-tag !text-gold-bright">Courses</span>
           <h1 className="text-4xl font-bold">课程中心</h1>
           <p className="mt-3 text-lg text-white/70">
-            全站会员制课程，一次开通永久学习全部课程。
+            登录账号后即可免费学习全部课程。
           </p>
         </div>
       </section>
+
+      <CourseAtlas />
 
       <section className="section">
         <div className="container-page">
@@ -50,19 +55,19 @@ export default function CoursesPage() {
                     <p className="mb-6 text-[14px] leading-relaxed text-ink-soft">
                       {course.description}
                     </p>
-                    <div className="mb-6 flex items-center gap-3">
-                      <span className="text-xl font-bold text-gold">
-                        ¥{MEMBERSHIP_PRICE.toLocaleString()}
-                      </span>
-                      <span className="text-[13px] text-muted">/ 永久全站会员</span>
-                    </div>
                     <div className="flex flex-wrap gap-3">
                       <Link href={`/courses/${course.slug}`} className="btn btn-primary">
                         查看课程大纲
                       </Link>
-                      <Link href="/membership" className="btn btn-gold">
-                        开通会员
-                      </Link>
+                      {user ? (
+                        <Link href={`/courses/${course.slug}`} className="btn btn-gold">
+                          立即学习
+                        </Link>
+                      ) : (
+                        <Link href={`/login?redirect=${encodeURIComponent(`/courses/${course.slug}`)}`} className="btn btn-gold">
+                          登录学习
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

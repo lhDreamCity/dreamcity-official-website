@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { courses, MEMBERSHIP_PRICE } from "@/app/lib/data";
+import { courses } from "@/app/lib/data";
+import { getCurrentUser } from "@/app/lib/auth";
 
 const SERVICES = [
   {
     icon: "🏗️",
     title: "OPC搭建",
-    href: "/services/opc",
+    href: "/services/ecommerce",
     summary: "从零到一的 AI 内容生产体系搭建，助你构建可持续的内容引擎。",
   },
   {
     icon: "✨",
     title: "个人品牌搭建",
-    href: "/services/personal-brand",
+    href: "/services/opc",
     summary: "围绕个人定位、视觉与人设，打造有辨识度的个人品牌资产。",
   },
   {
@@ -28,7 +29,8 @@ const WHY = [
   { icon: "🌱", title: "持续增长", summary: "以数据和复盘的视角，驱动内容与影响力的持续提升。" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
   return (
     <>
       {/* 英雄区 */}
@@ -88,7 +90,7 @@ export default function Home() {
             <span className="section-tag">Courses</span>
             <h2 className="section-title">AI 课程</h2>
             <p className="section-desc">
-              全站会员制课程，一次开通即可学习全部 {courses.length} 套课程。
+              登录账号即可学习全部 {courses.length} 套课程。
             </p>
           </div>
 
@@ -113,19 +115,19 @@ export default function Home() {
                     <p className="mb-5 text-[13px] leading-relaxed text-ink-soft">
                       {course.description}
                     </p>
-                    <div className="mb-5 flex items-center gap-3">
-                      <span className="text-lg font-bold text-gold">
-                        ¥{MEMBERSHIP_PRICE.toLocaleString()}
-                      </span>
-                      <span className="text-[12px] text-muted">/ 永久全站会员</span>
-                    </div>
                     <div className="flex flex-wrap gap-3">
                       <Link href={`/courses/${course.slug}`} className="btn btn-primary !py-2 text-[13px]">
                         查看课程目录
                       </Link>
-                      <Link href="/membership" className="btn btn-gold !py-2 text-[13px]">
-                        开通会员
-                      </Link>
+                      {user ? (
+                        <Link href={`/courses/${course.slug}`} className="btn btn-gold !py-2 text-[13px]">
+                          立即学习
+                        </Link>
+                      ) : (
+                        <Link href={`/login?redirect=${encodeURIComponent(`/courses/${course.slug}`)}`} className="btn btn-gold !py-2 text-[13px]">
+                          登录学习
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

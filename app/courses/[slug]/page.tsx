@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCourseBySlug, MEMBERSHIP_PRICE } from "@/app/lib/data";
+import { getCourseBySlug } from "@/app/lib/data";
+import { getCurrentUser } from "@/app/lib/auth";
 import { LessonProgressBadge, CourseProgressBar } from "@/app/components/lesson-progress";
 
 export default async function CourseDetailPage({
@@ -11,6 +12,7 @@ export default async function CourseDetailPage({
   const { slug } = await params;
   const course = getCourseBySlug(slug);
   if (!course) notFound();
+  const user = await getCurrentUser();
 
   return (
     <>
@@ -36,13 +38,15 @@ export default async function CourseDetailPage({
             {course.description}
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <span className="text-2xl font-bold text-gold-bright">
-              ¥{MEMBERSHIP_PRICE.toLocaleString()}
-            </span>
-            <span className="text-[14px] text-white/60">/ 永久全站会员 · 一次开通学全部</span>
-            <Link href="/membership" className="btn btn-gold ml-2">
-              开通会员，立即学习
-            </Link>
+            {user ? (
+              <Link href={`/courses/${course.slug}/lessons/${course.lessons[0].id}`} className="btn btn-gold">
+                立即学习
+              </Link>
+            ) : (
+              <Link href={`/login?redirect=${encodeURIComponent(`/courses/${course.slug}`)}`} className="btn btn-gold">
+                登录后免费学习
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -86,13 +90,19 @@ export default async function CourseDetailPage({
           </div>
 
           <div className="mt-12 rounded-2xl border border-gold/40 bg-gold-soft/30 p-8 text-center">
-            <h3 className="mb-2 text-lg font-bold text-ink">开通会员，解锁全部课程内容</h3>
+            <h3 className="mb-2 text-lg font-bold text-ink">登录后即可免费学习全部课程</h3>
             <p className="mb-5 text-[14px] text-ink-soft">
-              永久全站会员 ¥{MEMBERSHIP_PRICE.toLocaleString()}，一次开通，畅学全部课程。
+              注册学员账号，畅学全部 {course.lessons.length} 个课时。
             </p>
-            <Link href="/membership" className="btn btn-gold">
-              立即开通
-            </Link>
+            {user ? (
+              <Link href={`/courses/${course.slug}/lessons/${course.lessons[0].id}`} className="btn btn-gold">
+                开始学习
+              </Link>
+            ) : (
+              <Link href={`/login?redirect=${encodeURIComponent(`/courses/${course.slug}`)}`} className="btn btn-gold">
+                登录学习
+              </Link>
+            )}
           </div>
         </div>
       </section>

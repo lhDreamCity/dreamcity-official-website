@@ -16,10 +16,51 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/account";
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("member");
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [sending, setSending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState("");
+
+  async function handleSendCode() {
+    setError("");
+    if (!/^1\d{10}$/.test(phone)) {
+      setError("请输入正确的手机号");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch("/api/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "发送失败，请稍后重试");
+        setSending(false);
+        return;
+      }
+      // 开发期：服务器把验证码原样返回，前端自动填入以便测试。
+      if (data.devCode) {
+        setCode(data.devCode);
+      }
+      setSending(false);
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((c) => {
+          if (c <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return c - 1;
+        });
+      }, 1000);
+    } catch {
+      setError("网络错误，请稍后重试");
+      setSending(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +68,7 @@ function LoginForm() {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ phone, code }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -42,7 +83,7 @@ function LoginForm() {
     <section className="flex items-center justify-center bg-bg px-4 py-24">
       <div className="card w-full max-w-[420px] p-10">
         <h1 className="mb-2 text-center text-2xl font-bold text-ink">登录</h1>
-        <p className="mb-8 text-center text-[14px] text-muted">登录后即可进入会员中心</p>
+        <p className="mb-8 text-center text-[14px] text-muted">登录后即可学习全部课程</p>
 
         {error && (
           <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-[13px] text-red-600">
@@ -52,49 +93,47 @@ function LoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-[14px] font-medium text-ink">邮箱</label>
+            <label className="mb-1 block text-[14px] font-medium text-ink">手机号</label>
             <input
-              type="email"
+              type="tel"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
               className="w-full rounded-lg border border-line bg-white px-4 py-2.5 text-[14px] text-ink outline-none focus:border-gold"
-              placeholder="you@example.com"
+              placeholder="请输入 11 位手机号"
             />
           </div>
           <div>
-            <label className="mb-1 block text-[14px] font-medium text-ink">密码</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-line bg-white px-4 py-2.5 text-[14px] text-ink outline-none focus:border-gold"
-              placeholder="请输入密码"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-[14px] font-medium text-ink">
-              角色
-              <span className="ml-2 text-[11px] text-muted">开发期模拟 · 上线后按账号分配</span>
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full rounded-lg border border-line bg-white px-4 py-2.5 text-[14px] text-ink outline-none focus:border-gold"
-            >
-              <option value="member">会员 / 学员</option>
-              <option value="editor">运营 / 编辑</option>
-              <option value="teacher">讲师</option>
-              <option value="admin">超级管理员</option>
-            </select>
+            <label className="mb-1 block text-[14px] font-medium text-ink">验证码</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                className="w-full flex-1 rounded-lg border border-line bg-white px-4 py-2.5 text-[14px] text-ink outline-none focus:border-gold"
+                placeholder="请输入验证码"
+              />
+              <button
+                type="button"
+                onClick={handleSendCode}
+                disabled={sending || countdown > 0}
+                className="shrink-0 rounded-lg border border-gold px-3 py-2.5 text-[13px] font-semibold text-gold transition-colors hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {countdown > 0 ? `${countdown}s` : sending ? "发送中…" : "获取验证码"}
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn btn-primary w-full !py-3">
             登录
           </button>
         </form>
 
-        <p className="mt-6 text-center text-[14px] text-muted">
+        <p className="mt-5 text-center text-[12px] text-muted">
+          开发期验证码会由服务端自动填入，无需记忆。
+        </p>
+
+        <p className="mt-5 text-center text-[14px] text-muted">
           还没有账号？
           <Link href="/register" className="font-semibold text-gold hover:underline">
             立即注册

@@ -3,7 +3,6 @@ import { redirect, notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getLesson } from "@/app/lib/data";
 import { getCurrentUser } from "@/app/lib/auth";
-import { hasPermission } from "@/app/lib/rbac";
 import VideoProgressTracker from "@/app/components/video-progress";
 
 export async function generateMetadata({
@@ -32,10 +31,10 @@ export default async function LessonPage({
 
   const user = await getCurrentUser();
 
-  // RBAC 守卫：需具备 lesson:watch 权限（付费会员角色默认拥有），否则引导开通会员
-  if (!user || !hasPermission(user.permissions, "lesson:watch")) {
+  // 登录守卫：登录后即可观看全部课时，未登录引导登录
+  if (!user) {
     const redirectTo = `/courses/${course.slug}/lessons/${lesson.id}`;
-    redirect(`/membership?redirect=${encodeURIComponent(redirectTo)}`);
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
   }
 
   return (
