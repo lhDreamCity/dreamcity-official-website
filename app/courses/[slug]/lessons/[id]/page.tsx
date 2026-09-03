@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getLesson } from "@/app/lib/data";
 import { getCurrentUser } from "@/app/lib/auth";
+import { videoUrlFor } from "@/app/lib/media";
 import VideoProgressTracker from "@/app/components/video-progress";
 
 export async function generateMetadata({
@@ -70,7 +71,7 @@ export default async function LessonPage({
                   <VideoProgressTracker
                     courseSlug={course.slug}
                     lessonId={lesson.id}
-                    videoUrl={lesson.videoUrl}
+                    videoUrl={videoUrlFor(lesson.videoUrl) ?? ""}
                     poster={course.cover}
                   />
                 ) : (

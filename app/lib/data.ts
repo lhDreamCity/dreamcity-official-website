@@ -3,6 +3,10 @@ import type { Course, Lesson } from "./types";
 /* ============================================================
    课程数据源
    当前以本地静态数据维护，后续可平滑迁移至服务端数据库。
+
+   videoUrl 故意保留为相对路径（/courses/...），不要拼域名。
+   渲染时由 app/lib/media.ts 的 videoUrlFor() 根据
+   NEXT_PUBLIC_COS_BASE_URL 决定走 COS 还是本地 public/courses/。
    ============================================================ */
 
 function lesson(
