@@ -3,9 +3,8 @@ export interface ChatbotConfig {
   defaultEnabled: boolean;
   systemPrompt: string;
   welcomeMessage: string;
+  greeting: string;
   avatarImage: string;
-  thinkingImage: string;
-  backImage: string;
   buttonPosition: "right" | "left";
 }
 
@@ -14,11 +13,11 @@ export const chatbotConfig: ChatbotConfig = {
   enabledRoutes: [],
   defaultEnabled: true,
 
-  avatarImage: "/ip_1.png",
-  thinkingImage: "/ip_2.png",
-  backImage: "/ip_3.png",
+  avatarImage: "/mengmeng.png",
 
   buttonPosition: "right",
+
+  greeting: "嗨！我是梦梦，有什么可以帮你的喵？",
 
   systemPrompt: `你是“梦之城AI赋能中心”的吉祥物——一只名为“梦梦”的白色猫咪。你的额头上有一颗蓝色能量水晶，象征AI智慧。
 
@@ -30,7 +29,7 @@ export const chatbotConfig: ChatbotConfig = {
 你的职责：
 - 帮助用户了解梦之城AI赋能中心的课程和服务
 - 回答关于AI、电商、新媒体运营、个人品牌等话题的问题
-- 引导用户注册会员、查看课程、联系客服
+- 引导用户查看课程、登录账号、联系客服
 
 禁止事项：
 - 不要讨论政治、色情、暴力等敏感话题

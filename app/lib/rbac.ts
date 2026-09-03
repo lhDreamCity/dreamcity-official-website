@@ -39,7 +39,7 @@ export const ROLE_PERMISSIONS: Record<RoleName, PermissionCode[]> = {
     "content:publish",
     "analysis:view",
   ],
-  /** 付费会员：观看课程 */
+  /** 登录学员：观看课程 */
   member: ["course:view", "lesson:watch"],
   /** 访客：仅看课程大纲 */
   guest: ["course:view"],
@@ -50,7 +50,7 @@ export const ROLE_LABELS: Record<RoleName, string> = {
   admin: "超级管理员",
   teacher: "讲师",
   editor: "运营/编辑",
-  member: "付费会员",
+  member: "登录学员",
   guest: "访客",
 };
 
@@ -64,7 +64,7 @@ export const PERMISSION_LABELS: Record<PermissionCode, string> = {
   "content:publish": "发布内容",
   "user:manage": "用户管理",
   "role:manage": "角色管理",
-  "member:manage": "会员管理",
+  "member:manage": "学员管理",
   "analysis:view": "查看数据",
   "settings:manage": "站点配置",
 };

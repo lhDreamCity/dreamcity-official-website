@@ -9,18 +9,18 @@ export type Service = {
 
 export const services: Service[] = [
   {
-    slug: "opc",
+    slug: "ecommerce",
     title: "OPC搭建",
     description: "构建 AI 内容生产体系",
-    banner: "/img/banner-opc.png",
+    banner: "/img/banner-ecommerce.png",
     icon: "🏗️",
     body: "OPC（One Person Company）通过 AI 工具矩阵将内容生产的每个环节自动化，帮助个人或小团队以极低成本建立可持续的内容引擎。我们提供从工具选型、流程搭建到落地陪跑的全流程服务。",
   },
   {
-    slug: "personal-brand",
+    slug: "opc",
     title: "个人品牌搭建",
     description: "打造有辨识度的个人资产",
-    banner: "/img/banner-personal-brand.png",
+    banner: "/img/banner-opc.png",
     icon: "✨",
     body: "围绕定位、视觉、内容与人设，帮助你建立有辨识度、可信任的个人品牌。包含品牌故事梳理、视觉识别系统、内容矩阵规划等完整服务。",
   },

@@ -48,6 +48,13 @@ dev.log
 # course videos are large; tracked separately via deployment
 # public/courses/**/*.mp4
 
+# scratch / experimental
+/temp_covers/
+/temp_hf_module1/
+/temp_video/
+/test-generic/
+/test-module/
+
 # Docker
 .dockerignore
 

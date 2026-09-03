@@ -1,3 +1,5 @@
+import { SITE } from "@/app/lib/site-config";
+
 export const metadata = { title: "关于我们 - 梦之城AI赋能中心" };
 
 export default function AboutPage() {
@@ -28,6 +30,37 @@ export default function AboutPage() {
                 实战课程，帮助个人与团队从 0 到 1 跑通属于自己的第一单。
               </p>
             </div>
+          </div>
+
+          {/* 公司信息 */}
+          <div className="card mt-10 p-10">
+            <h3 className="mb-6 text-xl font-bold text-ink">公司信息</h3>
+            <dl className="grid gap-5 text-[15px] sm:grid-cols-2">
+              <div>
+                <dt className="mb-1 text-[13px] text-muted">公司名称</dt>
+                <dd className="font-medium text-ink">{SITE.company}</dd>
+              </div>
+              <div>
+                <dt className="mb-1 text-[13px] text-muted">公司地址</dt>
+                <dd className="font-medium text-ink">{SITE.address}</dd>
+              </div>
+              <div>
+                <dt className="mb-1 text-[13px] text-muted">联系邮箱</dt>
+                <dd className="font-medium text-ink">
+                  <a href={`mailto:${SITE.email}`} className="text-gold hover:underline">
+                    {SITE.email}
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt className="mb-1 text-[13px] text-muted">联系电话</dt>
+                <dd className="font-medium text-ink">
+                  <a href={`tel:${SITE.phone}`} className="text-gold hover:underline">
+                    {SITE.phone}
+                  </a>
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
       </section>

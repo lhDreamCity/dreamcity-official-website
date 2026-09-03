@@ -1,8 +1,8 @@
 import type { MembershipStatus, RoleName } from "./types";
 
 /* ============================================================
-   Admin 后台演示数据（mock）
-   接入 Supabase 后由真实表驱动（profiles / user_roles / subscriptions）
+   Admin 后台数据源
+   当前以本地静态数据维护，后续可平滑迁移至服务端数据库。
    ============================================================ */
 
 export type AdminUserRow = {
@@ -15,7 +15,7 @@ export type AdminUserRow = {
   lastActive: string;
 };
 
-/** 全站用户列表（演示） */
+/** 全站用户列表 */
 export const adminUsers: AdminUserRow[] = [
   {
     id: 1,
@@ -73,7 +73,7 @@ export const adminUsers: AdminUserRow[] = [
   },
 ];
 
-/** 概览统计（演示） */
+/** 概览统计 */
 export const adminStats = {
   totalUsers: adminUsers.length,
   activeMembers: adminUsers.filter((u) => u.membershipStatus === "active").length,

@@ -5,7 +5,7 @@ export type Course = {
   subtitle: string;
   description: string;
   cover: string;
-  price: number | null; // 统一走会员，这里展示用
+  price: number | null;
   duration: string;
   level: string;
   status: "published" | "draft";
@@ -16,7 +16,7 @@ export type Lesson = {
   id: number;
   title: string;
   sort: number;
-  videoUrl: string | null; // null = 占位
+  videoUrl: string | null;
   duration: string;
   summary: string;
   resourceUrl?: string | null;
@@ -33,13 +33,13 @@ export type RoleName =
   | "admin" // 超级管理员：全站权限
   | "teacher" // 讲师：管理课程内容
   | "editor" // 运营/编辑：内容与营销
-  | "member" // 付费会员：观看课程
+  | "member" // 登录学员：观看课程
   | "guest"; // 访客：未登录
 
 /** 权限点编码（resource:action） */
 export type PermissionCode =
   | "course:view" // 查看课程大纲
-  | "lesson:watch" // 观看课时（会员）
+  | "lesson:watch" // 观看课时（登录学员）
   | "course:create" // 创建课程
   | "course:edit" // 编辑课程
   | "lesson:manage" // 管理课时/视频

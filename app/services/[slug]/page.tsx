@@ -15,7 +15,7 @@ export function generateMetadata({ params }: { params: Promise<{ slug: string }>
 }
 
 export function generateStaticParams() {
-  return ["opc", "personal-brand", "social-media"].map((slug) => ({ slug }));
+  return ["opc", "ecommerce", "social-media"].map((slug) => ({ slug }));
 }
 
 export default async function ServiceDetailPage({

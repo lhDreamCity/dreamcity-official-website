@@ -12,8 +12,8 @@ const NAV_ITEMS = [
     label: "业务中心",
     href: "/services",
     children: [
-      { label: "OPC搭建", href: "/services/opc" },
-      { label: "个人品牌搭建", href: "/services/personal-brand" },
+      { label: "OPC搭建", href: "/services/ecommerce" },
+      { label: "个人品牌搭建", href: "/services/opc" },
       { label: "新媒体账号运营", href: "/services/social-media" },
     ],
   },
@@ -86,11 +86,6 @@ export default function Header({ user }: { user: User | null }) {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
-              {user.isMember && (
-                <span className="rounded-full bg-gold-soft px-3 py-1 text-[12px] font-bold text-gold">
-                  会员
-                </span>
-              )}
               <Link href="/account" className="text-[14px] text-ink-soft hover:text-gold">
                 {user.nickname || user.email}
               </Link>

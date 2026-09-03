@@ -1,3 +1,5 @@
+import { CONTACT, SITE } from "@/app/lib/site-config";
+
 export const metadata = { title: "合作交流 - 梦之城AI赋能中心" };
 
 export default function ContactPage() {
@@ -17,16 +19,24 @@ export default function ContactPage() {
             <h3 className="mb-6 text-xl font-bold text-ink">联系我们</h3>
             <ul className="space-y-4 text-[15px] text-ink-soft">
               <li>
+                <span className="mr-2 font-semibold text-ink">公司：</span>
+                {SITE.company}
+              </li>
+              <li>
                 <span className="mr-2 font-semibold text-ink">邮箱：</span>
-                hello@dreamcity.ai
+                <a href={`mailto:${CONTACT.email}`} className="text-gold hover:underline">
+                  {CONTACT.email}
+                </a>
               </li>
               <li>
                 <span className="mr-2 font-semibold text-ink">电话：</span>
-                400-000-0000
+                <a href={`tel:${CONTACT.phone}`} className="text-gold hover:underline">
+                  {CONTACT.phone}
+                </a>
               </li>
             </ul>
             <div className="mt-8 rounded-xl border border-dashed border-gold/50 bg-gold-soft/40 p-6 text-[14px] text-ink-soft">
-              如需商务合作、课程咨询或企业定制培训，欢迎通过上方联系方式与我们取得联系。
+              {CONTACT.note}
             </div>
           </div>
         </div>

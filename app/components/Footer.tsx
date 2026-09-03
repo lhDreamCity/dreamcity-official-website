@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { CONTACT, SITE } from "@/app/lib/site-config";
 
 const BUSINESS = [
-  { label: "OPC搭建", href: "/services/opc" },
-  { label: "个人品牌搭建", href: "/services/personal-brand" },
+  { label: "OPC搭建", href: "/services/ecommerce" },
+  { label: "个人品牌搭建", href: "/services/opc" },
   { label: "新媒体账号运营", href: "/services/social-media" },
 ];
 
@@ -20,7 +21,7 @@ export default function Footer() {
       <div className="container-page py-14">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <div className="mb-3 text-lg font-bold">梦之城AI赋能中心</div>
+            <div className="mb-3 text-lg font-bold">{SITE.name}</div>
             <p className="text-[14px] text-white/60">以 AI 之力，赋能每一位内容创业者。</p>
           </div>
           <div>
@@ -50,13 +51,13 @@ export default function Footer() {
           <div>
             <h4 className="mb-4 text-[15px] font-semibold text-gold-bright">联系我们</h4>
             <ul className="space-y-2 text-[14px] text-white/70">
-              <li>邮箱：hello@dreamcity.ai</li>
-              <li>电话：400-000-0000</li>
+              <li>邮箱：{CONTACT.email}</li>
+              <li>电话：{CONTACT.phone}</li>
             </ul>
           </div>
         </div>
         <div className="mt-10 border-t border-white/10 pt-6 text-[13px] text-white/50">
-          © 2026 梦之城AI赋能中心 · 保留所有权利
+          © 2026 {SITE.name} · 保留所有权利
         </div>
       </div>
     </footer>
