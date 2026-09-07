@@ -13,7 +13,7 @@ const PATH_STEPS = [
   {
     step: 1,
     courseSlug: "ai-digital-literacy",
-    title: "先修：AI 时代个人数字素养进阶课",
+    title: "先修：AI 时代个人数字素养基础课",
     desc: "看懂国内 AI 生态、把 AI 嵌入办公与知识管理、理解技术架构与提示词进阶，从工具使用者进阶为 AI 工作流设计师。",
     reason: "前置必修",
     skills: ["数字素养", "AI工作流", "工具选型"],

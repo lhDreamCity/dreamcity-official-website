@@ -10,7 +10,7 @@
 |---|---|---|---|
 | `COURSES_PLAN.md` | 项目根目录 | 全站课程融合规划（产品模式、技术架构、页面清单、阶段计划） | 已确认 |
 | `course-01-ecommerce.md` | `docs/courses/` | 《AI 个人电商实战》完整课程方案 | 已上架，8课视频已完成 |
-| `course-02-digital-literacy.md` | `docs/courses/` | 《AI 时代个人数字素养进阶课》完整大纲 | 已上架，6讲视频已完成 |
+| `course-02-digital-literacy.md` | `docs/courses/` | 《AI 时代个人数字素养基础课》完整大纲 | 已上架，6讲视频已完成 |
 | `course-03-opc.md` | `docs/courses/` | 《AI 时代个人品牌搭建》课程规划 | 规划中，已上架（视频占位） |
 | `rbac.md` | `docs/` | RBAC 账号体系 + Supabase 迁移方案 | 开发期框架已落地 |
 
@@ -69,7 +69,7 @@ docs/
 | ID | Slug | 标题 | 模块数 | 视频状态 | 封面图 |
 |---|---|---|---|---|---|
 | 1 | `ai-ecommerce` | AI 个人电商实战 | 8 | ✅ 已完成 | `/img/banner-ecommerce.png` |
-| 2 | `ai-digital-literacy` | AI 时代个人数字素养进阶课 | 6 | ✅ 已完成 | `/img/banner-digital.png` |
+| 2 | `ai-digital-literacy` | AI 时代个人数字素养基础课 | 6 | ✅ 已完成 | `/img/banner-digital.png` |
 | 3 | `ai-opc` | AI 时代个人品牌搭建 | 8 | ⏳ 占位 | `/img/banner-opc.png` |
 
 ---
