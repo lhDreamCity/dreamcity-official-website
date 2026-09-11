@@ -90,6 +90,11 @@ export async function resetFailures(id: string): Promise<void> {
     .where(eq(credentials.id, id));
 }
 
+/** 是否被锁定（locked_until > now）。 */
+export function isLocked(c: schema.Credential): boolean {
+  return c.lockedUntil !== null && c.lockedUntil > Date.now();
+}
+
 /** 改密码：删旧 credential + 建新的。 */
 export async function replaceCredentialSecret(
   identityId: string,

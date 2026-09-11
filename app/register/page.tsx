@@ -19,6 +19,8 @@ function RegisterForm() {
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
   const [sending, setSending] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState("");
@@ -68,7 +70,12 @@ function RegisterForm() {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, code, nickname }),
+      body: JSON.stringify({
+        phone,
+        code,
+        nickname,
+        ...(usePassword && password ? { password } : {}),
+      }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -135,6 +142,36 @@ function RegisterForm() {
               </button>
             </div>
           </div>
+
+          <label className="flex items-center gap-2 text-[13px] text-muted">
+            <input
+              type="checkbox"
+              checked={usePassword}
+              onChange={(e) => setUsePassword(e.target.checked)}
+              className="h-4 w-4 rounded border-line text-gold focus:ring-gold"
+            />
+            同时设置登录密码（可选）
+          </label>
+
+          {usePassword && (
+            <div>
+              <label className="mb-1 block text-[14px] font-medium text-ink">
+                登录密码
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-line bg-white px-4 py-2.5 text-[14px] text-ink outline-none focus:border-gold"
+                placeholder="8 位以上，含字母与数字"
+                minLength={8}
+              />
+              <p className="mt-1 text-[12px] text-muted">
+                设置后下次可使用密码登录，未设置则只能用手机验证码登录
+              </p>
+            </div>
+          )}
+
           <button type="submit" className="btn btn-primary w-full !py-3">
             注册
           </button>
