@@ -34,7 +34,7 @@ function RegisterForm() {
       const res = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, purpose: "register" }),
       });
       const data = await res.json();
       if (!res.ok) {

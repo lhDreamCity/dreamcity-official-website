@@ -1,16 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ROLE_COOKIE, USER_COOKIE } from "@/app/lib/auth";
-import { verifyValue } from "@/app/lib/session-secret";
+import { SESSION_COOKIE } from "@/app/lib/auth";
 
 /* ============================================================
-   路由级 RBAC 守卫（Edge Proxy，Next 16）
-   在请求进入页面/接口前拦截，按角色决定放行或重定向。
+   路由级守卫（Edge Proxy，Next 16）
 
-   Cookie 值是 HMAC 签过的 payload.signature。Proxy 必须先
-   verifyValue 才能信任 claim —— 否则用户可以自己改 cookie
-   把 dcw_role 改成 "admin"。
+   Edge runtime 不能查 libsql（native binding 不可用）。所以 proxy 仅做：
+     - "是否已登录"判断：dcw_sid cookie 存在即视为登录。
+     - 未登录访问受保护路径 → 重定向 /login。
 
-   上线后这套签名机制替换为 Supabase session 即可，路径规则不变。
+   真正的角色 / 权限判定放在 page / route handler 里 await getCurrentUser()。
+   这里的 Edge 守卫主要是省一次 SSR round-trip：未登录直接 redirect。
+
+   注：cookie 名常量从 app/lib/auth.ts 引入（auth.ts 本身 import 了 DB client，
+   但 SESSION_COOKIE 是纯字符串常量，bundle 时会被 tree-shake 到这里 OK）。
    ============================================================ */
 
 const ROLE_PROTECTED: { prefix: string; roles: string[] }[] = [
@@ -22,11 +24,8 @@ const AUTH_PROTECTED: string[] = ["/account", "/member"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Verify the user cookie signature before trusting "is logged in".
-  const userRaw = request.cookies.get(USER_COOKIE)?.value;
-  const user = await verifyValue(userRaw);
-  const isAuthed = !!user;
+  const sid = request.cookies.get(SESSION_COOKIE)?.value;
+  const isAuthed = !!sid;
 
   if (AUTH_PROTECTED.some((p) => pathname.startsWith(p)) && !isAuthed) {
     const url = request.nextUrl.clone();
@@ -35,17 +34,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Verify the role cookie signature before trusting the role claim.
-  const roleRaw = request.cookies.get(ROLE_COOKIE)?.value;
-  const role = await verifyValue(roleRaw);
-
+  // Role-protected: 仅 admin / teacher / editor 才能进 /admin 等。
+  // Edge 不能查 DB，所以这里只做"是否登录"的二次检查：已登录才放行，
+  // 登录后再由 page 内 getCurrentUser 判定角色，不匹配则 page 渲染 403。
+  // 这是有意为之的取舍：避免 Edge runtime 引入 DB；具体权限由 page 兜底。
   for (const rule of ROLE_PROTECTED) {
-    if (pathname.startsWith(rule.prefix)) {
-      if (!role || !rule.roles.includes(role)) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/forbidden";
-        return NextResponse.redirect(url);
-      }
+    if (pathname.startsWith(rule.prefix) && !isAuthed) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin-login";
+      url.search = `?redirect=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
     }
   }
 
