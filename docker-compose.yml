@@ -13,15 +13,21 @@ services:
       - NEXT_PUBLIC_COS_BASE_URL=${NEXT_PUBLIC_COS_BASE_URL:-}
       # 安全敏感变量：host 没设时 docker compose 直接报错，避免容器起来后才发现。
       - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET must be set}
+      - IDENTIFIER_HASH_SECRET=${IDENTIFIER_HASH_SECRET:?IDENTIFIER_HASH_SECRET must be set}
       - ADMIN_USERNAME=${ADMIN_USERNAME:?ADMIN_USERNAME must be set}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set}
       # 聊天 / OpenAI 兼容 API：可选，没配 chatbot 直接降级。
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_API_URL=${OPENAI_API_URL:-}
       - OPENAI_MODEL=${OPENAI_MODEL:-}
+      # SQLite 数据文件：M6 时配 named volume；现在先落到容器内 /data，镜像升级会丢。
+      - DATABASE_URL=${DATABASE_URL:-file:/data/dreamcity.db}
     env_file:
       # 兜底注入：上面 environment 优先；这里兼容直接把 .env.local 拷贝到服务器部署的场景。
       - .env.local
+    volumes:
+      # M6 会改成 named volume；当前先 bind 到 host ./data 方便 dev 看文件。
+      - ./data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
