@@ -51,7 +51,7 @@ export type PermissionCode =
   | "settings:manage"; // 站点配置
 
 export type User = {
-  id: number;
+  id: string; // ULID
   email: string;
   nickname: string;
   isMember: boolean;

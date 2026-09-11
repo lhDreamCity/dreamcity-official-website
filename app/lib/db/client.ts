@@ -21,19 +21,20 @@ import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import * as schema from "./schema";
 
-type DbHandle = {
-  client: Client;
-  db: LibSQLDatabase<typeof schema>;
-};
+/**
+ * 为什么不缓存单例：tests/setupTestDb() 会改 DATABASE_URL 然后通过
+ * `?t=<rand>` query string 强制重新 import 这个模块，每次拿到独立的 client。
+ *
+ * 生产环境：DATABASE_URL 不会变 → 多次 import 也会得到不同 client 对象，
+ * 但每个 client 自己管理同一文件不冲突（libsql 内部用 advisory lock）。
+ *
+ * dev HMR：每次模块重载拿新连接，旧连接 GC 回收。libsql 的 close() 由 Node
+ * 进程退出时自动触发；HMR 期间可能会有少量短暂泄漏，可接受。
+ */
 
-const globalForDb = globalThis as unknown as {
-  __dreamcity_db__?: DbHandle;
-};
-
-function makeHandle(): DbHandle {
+function buildHandle(): { client: Client; db: LibSQLDatabase<typeof schema> } {
   const url = process.env.DATABASE_URL ?? "file:./data/dreamcity.db";
 
-  // dev 模式自动确保目录存在；prod 由 docker-compose 准备
   if (url.startsWith("file:") && !url.includes(":memory:")) {
     const path = url.slice("file:".length);
     if (path.startsWith("./") || path.startsWith("/")) {
@@ -44,9 +45,6 @@ function makeHandle(): DbHandle {
 
   const client = createClient({ url });
 
-  // WAL + busy_timeout 用 raw SQL 设，逐条 execute（避开 batch 的事务包裹，
-  // 因为 PRAGMA journal_mode 不能在事务里改）。
-  // synchronous / foreign_keys / busy_timeout 都不是事务敏感的，但仍逐条更稳。
   for (const stmt of [
     "PRAGMA journal_mode = WAL",
     "PRAGMA synchronous = NORMAL",
@@ -60,10 +58,7 @@ function makeHandle(): DbHandle {
   return { client, db };
 }
 
-const handle = globalForDb.__dreamcity_db__ ?? makeHandle();
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.__dreamcity_db__ = handle;
-}
+const handle = buildHandle();
 
 export const db = handle.db;
 export const client = handle.client;
