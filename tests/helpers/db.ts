@@ -22,27 +22,21 @@ export type TestDb = {
 /**
  * 每个测试文件用一份新的 temp file DB + 跑 migration。
  *
- * 通过设置 DATABASE_URL + 让 client.ts 重新初始化 handle，让所有走
- * app/lib/db/client.ts 的 queries 路由到这份临时 DB。这样 setupTestDb
+ * 通过设置 DATABASE_URL + 调用 client._resetForTest() 让所有走
+ * app/lib/db/client.ts 的 queries 路由到这份临时 DB。setupTestDb
  * 之后的测试调用 createUser / createIdentity 等都自动落到独立 DB。
- *
- * 注意：因为 libsql client 缓存了 prepared statements / 连接，必须
- * 在切 URL 时把 client.ts 的缓存清掉。这里用动态 import + 删除模块缓存
- * 强制重新初始化。
  */
 export async function setupTestDb(): Promise<TestDb> {
   const dir = mkdtempSync(join(tmpdir(), "dreamcity-test-"));
   const file = join(dir, "test.db");
   process.env.DATABASE_URL = `file:${file}`;
 
-  // 强制重新初始化 app/lib/db/client.ts 模块，让它读新的 DATABASE_URL
-  // 并拿到全新的 client。tsx/Node 模块缓存通过 query string 区分。
-  const url = `file:///${file}?t=${Date.now()}-${Math.random()}`;
-  const { db, client, schema } = await import(
-    `../../app/lib/db/client.ts?${Date.now()}`
-  );
+  // 关闭并清空 client.ts 缓存的 handle,让下一次访问按新 DATABASE_URL 重建。
+  // 不需要再依赖动态 import + ?t=... 的 cache-busting (Windows / Linux 行为不一致)。
+  const { _resetForTest, db, client } = await import("../../app/lib/db/client.ts");
+  _resetForTest();
 
-  // 在新 URL 上跑 migration
+  // 在新 DB 上跑 migration
   const { migrate } = await import("drizzle-orm/libsql/migrator");
   migrate(db, { migrationsFolder: "./drizzle" });
 
