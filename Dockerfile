@@ -12,6 +12,13 @@ RUN npm ci --only=production=false
 
 # 复制源码并构建
 COPY . .
+
+# 构建时 Next.js 会 collect page data，过程中会导入 app/lib/identifier-hash.ts，
+# 它在模块顶层就 require IDENTIFIER_HASH_SECRET / SESSION_SECRET (>=32 chars)。
+# 这里设一个 build-time dummy（仅用于让 import 不抛错）；真 secret 在运行时通过
+# docker compose env_file 注入。值长度必须 >= 32 字符。
+ENV IDENTIFIER_HASH_SECRET=build-time-dummy-do-not-use-in-prod-32-chars
+
 RUN npm run build
 
 # ---------- Stage 2: Runner ----------
