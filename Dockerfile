@@ -50,4 +50,5 @@ COPY --from=builder /app/scripts ./scripts
 EXPOSE 3000
 
 # 启动顺序：先 apply migration（保证 schema 与镜像版本对齐），再起 Next.js server
-CMD ["sh", "-c", "tsx scripts/db-migrate.ts && exec node server.js"]
+# 用 ./node_modules/.bin/tsx 绝对路径：npm 装本地包到 node_modules/.bin，不在 PATH 默认目录里
+CMD ["sh", "-c", "./node_modules/.bin/tsx scripts/db-migrate.ts && exec node server.js"]
