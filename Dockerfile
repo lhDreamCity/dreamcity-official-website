@@ -30,7 +30,7 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# 只复制生产必需文件
+# 复制生产必需文件
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 COPY --from=builder /app/next.config.ts ./
@@ -42,6 +42,12 @@ COPY --from=builder /app/.next/static ./.next/static
 # 但如果使用了原生依赖，需要保留 node_modules
 COPY --from=builder /app/node_modules ./node_modules
 
+# drizzle migration 文件 + 迁移 runner。启动时跑 db-migrate 是 idempotent 的
+# (drizzle migrator 用 __drizzle_migrations 表跟踪),新建空 DB 时建表,已有 schema 时跳过。
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/scripts ./scripts
+
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# 启动顺序：先 apply migration（保证 schema 与镜像版本对齐），再起 Next.js server
+CMD ["sh", "-c", "tsx scripts/db-migrate.ts && exec node server.js"]

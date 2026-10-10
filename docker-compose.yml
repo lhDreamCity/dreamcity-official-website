@@ -1,5 +1,8 @@
 services:
   app:
+    # 服务器部署：docker compose pull && docker compose up -d（拉 GHCR 镜像）
+    # 本地开发：docker compose up -d --build（走下面的 build 段，覆盖 image）
+    image: ghcr.io/lhdreamcity/dreamcity-official-website:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -30,8 +33,19 @@ services:
       - ./data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    # dreamcity-web 同时挂在 dreamcity_default（给本机直连）和 proxy（给外部 caddy 反代）
+    networks:
+      - default
+      - proxy
+
+# dreamcity-web 暴露在 dreamcity_default 给本机访问 + proxy network 给外部 caddy 反代
+networks:
+  default: {}
+  proxy:
+    external: true
+    name: proxy
