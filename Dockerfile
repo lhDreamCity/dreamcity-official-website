@@ -46,6 +46,10 @@ COPY --from=builder /app/node_modules ./node_modules
 # (drizzle migrator 用 __drizzle_migrations 表跟踪),新建空 DB 时建表,已有 schema 时跳过。
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/scripts ./scripts
+# db-migrate.ts 直接 import "../app/lib/db/client",所以 app/ 源码也得拷过来。
+# (Next 16 standalone 把 .next/server/ 打包了 app/,但 db-migrate 走 Node 直跑 tsx,
+#  解析的是相对文件路径,必须能看到 app/ 才能 resolve。)
+COPY --from=builder /app/app ./app
 
 EXPOSE 3000
 
