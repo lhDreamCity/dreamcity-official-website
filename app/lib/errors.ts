@@ -55,5 +55,8 @@ export function errorResponse(e: unknown): {
   if (e instanceof ApiError) {
     return { status: e.status, body: e.toJSON() };
   }
+  // 非 ApiError 走兜底 500，但要 console.error 让 Next.js 16 production
+  // 也能看到真错误（之前吞了导致 5xx 静默，debug 不出来）。
+  console.error("[unhandled api error]", e);
   return { status: 500, body: { error: "服务器错误" } };
 }
