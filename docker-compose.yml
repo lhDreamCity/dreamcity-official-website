@@ -7,8 +7,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: dreamcity-web
-    ports:
-      - "3000:3000"
+    # 3000 仅暴露给 caddy 容器（走 `proxy` external network）+ 容器内 healthcheck。
+    # 主机端口已关闭：公网 3000 不可达，避免绕过 HTTPS / caddy 的安全头。
+    # 本地 dev 想直连：`docker compose run --service-ports app` 临时开端口。
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       # COS / CDN：可选。未设则视频继续走镜像内的 public/courses/。
@@ -25,6 +28,9 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL:-}
       # SQLite 数据文件：M6 时配 named volume；现在先落到容器内 /data，镜像升级会丢。
       - DATABASE_URL=${DATABASE_URL:-file:/data/dreamcity.db}
+      # 反代深度：1 = 信任 1 层反代（caddy）。dev 默认 0；
+      # 本机 .env.local 设了 TRUSTED_PROXY_DEPTH=0 走 dev 习惯，否则容器默认 1。
+      - TRUSTED_PROXY_DEPTH=${TRUSTED_PROXY_DEPTH:-1}
     env_file:
       # 兜底注入：上面 environment 优先；这里兼容直接把 .env.local 拷贝到服务器部署的场景。
       - .env.local

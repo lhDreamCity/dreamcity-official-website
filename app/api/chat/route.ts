@@ -1,8 +1,26 @@
 import { NextRequest } from "next/server";
+import { getClientIp, rateLimit } from "@/app/lib/rate-limit";
 
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
+  // 限流：每 IP 每分钟 20 次（chatbot 还没登录态，先按 IP 粗限）。
+  // /api/chat 走 OpenAI 真烧钱 + 真消耗配额，没限流是 DoS / 刷账单风险。
+  const ip = getClientIp(req);
+  const rl = rateLimit(`chat:ip:${ip}`, 20, 60_000);
+  if (!rl.allowed) {
+    return new Response(
+      JSON.stringify({ error: "请求过于频繁，请稍后再试" }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)),
+        },
+      },
+    );
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = process.env.OPENAI_API_URL || "https://api.openai.com/v1";
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
