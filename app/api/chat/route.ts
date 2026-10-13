@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import { getClientIp, rateLimit } from "@/app/lib/rate-limit";
 
-export const runtime = "edge";
+// Node runtime（不是 edge）：rate-limit 的 in-memory token-bucket 依赖 module-level
+// Map 跨请求持久；edge runtime 下每个 V8 isolate 各自的 module 实例，Map 各自独立，
+// 限流等于失效。Node runtime 一次冷启 ~200ms，对 chat 场景可接受。
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   // 限流：每 IP 每分钟 20 次（chatbot 还没登录态，先按 IP 粗限）。
