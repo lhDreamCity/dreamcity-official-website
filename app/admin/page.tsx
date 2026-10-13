@@ -1,17 +1,24 @@
 import Link from "next/link";
 import { courses } from "@/app/lib/data";
-import { adminStats } from "@/app/lib/admin-data";
+import { loadAdminStats, type AdminStats } from "@/app/lib/admin-data";
 
-const STATS = [
-  { label: "注册用户", value: adminStats.totalUsers, suffix: "人", icon: "👥", href: "/admin/users" },
-  { label: "有效会员", value: adminStats.activeMembers, suffix: "人", icon: "👑", href: "/admin/members" },
-  { label: "全部课程", value: courses.length, suffix: "门", icon: "📚", href: "/admin/courses" },
-  { label: "课时总数", value: courses.reduce((n, c) => n + c.lessons.length, 0), suffix: "节", icon: "🎬", href: "/admin/courses" },
-  { label: "累计订单", value: adminStats.totalOrders, suffix: "单", icon: "🧾", href: "/admin/members" },
-  { label: "累计营收", value: "¥" + adminStats.revenue.toLocaleString(), suffix: "", icon: "💰", href: "/admin/members" },
-];
+function buildStats(stats: AdminStats, courseCount: number, lessonCount: number) {
+  return [
+    { label: "注册用户", value: stats.totalUsers, suffix: "人", icon: "👥", href: "/admin/users" },
+    { label: "活跃用户", value: stats.activeUsers, suffix: "人", icon: "✅", href: "/admin/members" },
+    { label: "全部课程", value: courseCount, suffix: "门", icon: "📚", href: "/admin/courses" },
+    { label: "课时总数", value: lessonCount, suffix: "节", icon: "🎬", href: "/admin/courses" },
+    { label: "近 7 天新增", value: stats.weeklyNewUsers, suffix: "人", icon: "📈", href: "/admin/users" },
+    { label: "已停用", value: stats.disabledUsers, suffix: "人", icon: "⏸", href: "/admin/users" },
+  ];
+}
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const stats = await loadAdminStats();
+  const courseCount = courses.length;
+  const lessonCount = courses.reduce((n, c) => n + c.lessons.length, 0);
+  const cards = buildStats(stats, courseCount, lessonCount);
+
   return (
     <div>
       <header className="mb-6">
@@ -21,7 +28,7 @@ export default function AdminDashboardPage() {
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {STATS.map((s) => (
+        {cards.map((s) => (
           <Link
             key={s.label}
             href={s.href}
@@ -47,7 +54,7 @@ export default function AdminDashboardPage() {
           <QuickLink href="/admin/courses" title="管理课程" desc="增改课程与课时" />
           <QuickLink href="/admin/roles" title="配置角色" desc="分配角色权限" />
           <QuickLink href="/admin/users" title="管理用户" desc="查看与搜索用户" />
-          <QuickLink href="/admin/members" title="会员管理" desc="查看会员状态" />
+          <QuickLink href="/admin/members" title="活跃用户" desc="查看可学习用户" />
         </div>
       </div>
     </div>

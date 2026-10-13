@@ -1,62 +1,58 @@
-import { adminUsers, adminStats } from "@/app/lib/admin-data";
+import { loadAdminUsers, loadAdminStats } from "@/app/lib/admin-data";
 
-const STATE: Record<string, { label: string; cls: string }> = {
-  active: { label: "有效", cls: "bg-gold-soft text-gold" },
-  expired: { label: "已过期", cls: "bg-bg text-muted" },
-  none: { label: "非会员", cls: "bg-bg text-muted" },
+const STATUS: Record<string, { label: string; cls: string }> = {
+  active: { label: "活跃", cls: "bg-gold-soft text-gold" },
+  disabled: { label: "已停用", cls: "bg-bg text-muted" },
+  deleted: { label: "已注销", cls: "bg-bg text-muted" },
 };
 
-const PLAN = ["年卡会员", "月卡会员", "终身会员", "—"];
-
-export default function AdminMembersPage() {
-  const members = adminUsers.filter((u) => u.membershipStatus !== "none");
+export default async function AdminMembersPage() {
+  const [users, stats] = await Promise.all([loadAdminUsers(), loadAdminStats()]);
+  // 登录学员 = status === "active" 的用户（"会员" 在新模型下即"可登录可学习"）
+  const members = users.filter((u) => u.status === "active");
 
   return (
     <div>
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">会员管理</h1>
-          <p className="mt-1 text-[13px] text-ink-soft">付费会员订阅管理</p>
-        </div>
-        <div className="text-right">
-          <p className="text-lg font-bold text-gold">¥{adminStats.revenue.toLocaleString()}</p>
-          <p className="text-[11px] text-ink-soft">累计营收</p>
-        </div>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-ink">活跃用户</h1>
+        <p className="mt-1 text-[13px] text-ink-soft">
+          登录学员 · 可学习全部课程
+        </p>
       </header>
 
-      {/* 统计 */}
       <div className="mb-6 grid grid-cols-3 gap-4">
-        <StatCard label="有效会员" value={adminStats.activeMembers} />
-        <StatCard label="已过期" value={adminStats.expiredMembers} />
-        <StatCard label="累计订单" value={adminStats.totalOrders} />
+        <StatCard label="活跃" value={stats.activeUsers} />
+        <StatCard label="已停用" value={stats.disabledUsers} />
+        <StatCard label="近 7 天新增" value={stats.weeklyNewUsers} />
       </div>
 
-      {/* 会员列表 */}
       <div className="card overflow-x-auto">
         <table className="w-full text-left text-[13px]">
           <thead>
             <tr className="border-b border-line text-ink-soft">
-              <th className="py-3 pl-5 pr-4 font-semibold">会员</th>
-              <th className="px-3 py-3 font-semibold">套餐</th>
+              <th className="py-3 pl-5 pr-4 font-semibold">用户</th>
               <th className="px-3 py-3 font-semibold">状态</th>
               <th className="px-3 py-3 font-semibold">加入时间</th>
+              <th className="px-3 py-3 font-semibold">最近活跃</th>
               <th className="py-3 pl-3 pr-5 text-right font-semibold">操作</th>
             </tr>
           </thead>
           <tbody>
-            {members.map((u, i) => (
+            {members.map((u) => (
               <tr key={u.id} className="border-b border-line/60 hover:bg-bg/40">
                 <td className="py-3 pl-5 pr-4">
                   <p className="font-medium text-ink">{u.nickname}</p>
-                  <p className="text-[12px] text-ink-soft">{u.email}</p>
+                  <p className="text-[12px] text-ink-soft">{u.primaryIdentifier}</p>
                 </td>
-                <td className="px-3 py-3">{PLAN[i % PLAN.length]}</td>
                 <td className="px-3 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${STATE[u.membershipStatus].cls}`}>
-                    {STATE[u.membershipStatus].label}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${STATUS[u.status]!.cls}`}
+                  >
+                    {STATUS[u.status]!.label}
                   </span>
                 </td>
                 <td className="px-3 py-3 text-ink-soft">{u.joinDate}</td>
+                <td className="px-3 py-3 text-ink-soft">{u.lastActive}</td>
                 <td className="py-3 pl-3 pr-5 text-right">
                   <button className="text-[13px] font-semibold text-brand hover:underline">
                     管理
@@ -64,6 +60,13 @@ export default function AdminMembersPage() {
                 </td>
               </tr>
             ))}
+            {members.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-10 text-center text-ink-soft">
+                  暂无活跃用户
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
